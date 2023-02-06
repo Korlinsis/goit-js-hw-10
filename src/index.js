@@ -14,16 +14,17 @@ inputEl.addEventListener('input', debounce(getCountries, DEBOUNCE_DELAY));
 function getCountries(e) {
     list.innerHTML =  '';
     countryInfo.innerHTML = '';
-    fetchCountries(e.target.value.trim())
+
+    if (e.target.value.trim() === '') return;
+
+    fetchCountries(e.target.value)
     .then(data => {
         if (data.length === 1) {
             countryInfo.innerHTML = showCountry(data[0]);
-            console.log(data);
         } else if (data.length > 10) {
             return Notify.info('Too many matches found. Please enter a more specific name.');
         } else {
             list.innerHTML =  showCountriesList(data);
-            console.log(data);
         }
     })
     .catch(Notify.failure('Oops, there is no country with that name'));
@@ -31,21 +32,23 @@ function getCountries(e) {
 
 function showCountry({name, flags, capital, population, languages}) {
     return `
-    <div>
-        <img src="${flags.svg}" alt="${name.official}" width="30">
-        <p>${name.official}</p>
-        <p>Capital: ${capital}</p>
-        <p>Population: ${population}</p>
-        <p>Languages: ${Object.values(languages)}</p>
+    <div class="name">
+        <img src="${flags.svg}" alt="${name.official}" width="30" height="20">
+        <h2>${name.official}</h2>
     </div>
+    <ul>
+        <li>Capital: <span>${capital}</span></li>
+        <li>Population: <span>${population}</span></li>
+        <li>Languages: <span>${Object.values(languages)}</span></li>
+    </ul>
     `;
 }
 
 function showCountriesList(countries) {
     return countries.reduce((list, {flags, name}) => {
         return `
-        <li>
-            <img src="${flags.svg}" alt="${name.official}" width="30">
+        <li class="name">
+            <img src="${flags.svg}" alt="${name.official}" width="30" height="20">
             <p>${name.official}</p>
         </li>`
         + list;
