@@ -1,6 +1,6 @@
 import './css/styles.css';
-import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import debounce from "lodash.debounce";
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import { fetchCountries } from "./fetchCountries";
 
 const DEBOUNCE_DELAY = 300;
@@ -12,12 +12,13 @@ const countryInfo = document.querySelector('.country-info');
 inputEl.addEventListener('input', debounce(getCountries, DEBOUNCE_DELAY));
 
 function getCountries(e) {
+    const request = e.target.value.trim();
     list.innerHTML =  '';
     countryInfo.innerHTML = '';
 
-    if (e.target.value.trim() === '') return;
+    if (request === '') return;
 
-    fetchCountries(e.target.value)
+    fetchCountries(request)
     .then(data => {
         if (data.length === 1) {
             countryInfo.innerHTML = showCountry(data[0]);
@@ -27,7 +28,7 @@ function getCountries(e) {
             list.innerHTML =  showCountriesList(data);
         }
     })
-    .catch(Notify.failure('Oops, there is no country with that name'));
+    .catch(onError);
 }
 
 function showCountry({name, flags, capital, population, languages}) {
@@ -39,9 +40,8 @@ function showCountry({name, flags, capital, population, languages}) {
     <ul>
         <li>Capital: <span>${capital}</span></li>
         <li>Population: <span>${population}</span></li>
-        <li>Languages: <span>${Object.values(languages)}</span></li>
-    </ul>
-    `;
+        <li>Languages: <span>${Object.values(languages).join(', ')}</span></li>
+    </ul>`;
 }
 
 function showCountriesList(countries) {
@@ -53,5 +53,9 @@ function showCountriesList(countries) {
         </li>`
         + list;
       }, '');
+}
+
+function onError() {
+    return Notify.failure('Oops, there is no country with that name');
 }
 
